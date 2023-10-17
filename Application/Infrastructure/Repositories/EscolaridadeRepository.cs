@@ -16,7 +16,8 @@ namespace UserManagementAPI.Application.Infrastructure.Repositories
         public async Task<Escolaridade?> GetEscolaridadeByDescricaoAsync(string descricao)
         {
             return await _context.Escolaridades
-                .FirstOrDefaultAsync(e => e.Descricao.Equals(descricao, StringComparison.OrdinalIgnoreCase));
+                .Where(e => e.Descricao.Equals(descricao))
+                .FirstOrDefaultAsync();
         }
     }
 }

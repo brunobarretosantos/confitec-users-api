@@ -20,12 +20,13 @@ namespace UserManagementAPI.Application.CommandHandlers
 
         public async Task<int> Handle(AddUsuarioCommand command)
         {
-            var escolaridade = await ObterEscolaridade(command.Escolaridade);
+            var escolaridade = await ObterEscolaridade(command.Escolaridade);            
 
             var usuario = command.ToModel();
+            usuario.Escolaridade = escolaridade;
             usuario.EscolaridadeId = escolaridade.Id;
 
-            int usuarioId = await _usuarioRepository.AddUsuarioAsync(command.ToModel());
+            int usuarioId = await _usuarioRepository.AddUsuarioAsync(usuario);
             return usuarioId;
         }
 
@@ -34,9 +35,10 @@ namespace UserManagementAPI.Application.CommandHandlers
             var escolaridade = await ObterEscolaridade(command.Escolaridade);
 
             var usuario = command.ToModel();
+            usuario.Escolaridade = escolaridade;
             usuario.EscolaridadeId = escolaridade.Id;
             
-            await _usuarioRepository.UpdateUsuarioAsync(command.ToModel());
+            await _usuarioRepository.UpdateUsuarioAsync(usuario);
         }
 
         public async Task Handle(DeleteUsuarioCommand command)
@@ -60,7 +62,7 @@ namespace UserManagementAPI.Application.CommandHandlers
 
             if (escolaridade == null)
             {
-                throw new  EscolaridadeInvalidaException(descricao!);
+                throw new EscolaridadeInvalidaException(descricao!);
             }
 
             return escolaridade;

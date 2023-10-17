@@ -55,3 +55,4 @@ TestResults/
 # Arquivos de configuração do Rider
 .idea/
 *.sln.iml
+.fake
