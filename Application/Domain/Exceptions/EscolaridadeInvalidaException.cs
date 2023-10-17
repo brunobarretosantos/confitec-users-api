@@ -1,13 +1,11 @@
-using System.Runtime.Serialization;
-
-namespace UserManagementAPI.Application.CommandHandlers
+namespace UserManagementAPI.Application.Domain.Exceptions
 {
     [Serializable]
-    public class EscolaridadeInvalidaException : Exception
+    public class EscolaridadeInvalidaException : BadRequestException
     {
         public string Value { get; }
         
-        public EscolaridadeInvalidaException(string value) : base("O valor informado para a escolaridade é inválido")
+        public EscolaridadeInvalidaException(string value) : base("O valor informado para o campo Escolaridade é inválido")
         {
             Value = value;
         }        

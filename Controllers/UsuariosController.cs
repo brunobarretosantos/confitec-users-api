@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using UserManagementAPI.Domain.Models;
 using UserManagementAPI.Application.Commands;
 using UserManagementAPI.Application.CommandHandlers;
 using UserManagementAPI.Application.Infrastructure.Repositories;
+using UserManagementAPI.Application.Domain.Exceptions;
 
 namespace UserManagementAPI.Controllers
 {
@@ -13,11 +13,13 @@ namespace UserManagementAPI.Controllers
     {
         private readonly UsuarioCommandHandler _usuarioCommandHandler;
         private readonly UsuarioRepository _usuarioRepository;
+        private readonly ILogger<UsuariosController> _logger;
 
-        public UsuariosController(UsuarioCommandHandler usuarioCommandHandler, UsuarioRepository usuarioRepository)        
+        public UsuariosController(UsuarioCommandHandler usuarioCommandHandler, UsuarioRepository usuarioRepository, ILogger<UsuariosController> logger)        
         {
             _usuarioCommandHandler = usuarioCommandHandler;
             _usuarioRepository = usuarioRepository;
+            _logger = logger;
         }
 
         [HttpGet]
@@ -29,23 +31,46 @@ namespace UserManagementAPI.Controllers
 
         [HttpPost]
         public async Task<ActionResult<Usuario>> PostUsuario(AddUsuarioCommand command)
-        {
-            var usuarioId = await _usuarioCommandHandler.Handle(command);
+        {      
+            try
+            {
+                var usuarioId = await _usuarioCommandHandler.Handle(command);
+                var usuario = await _usuarioRepository.GetUsuarioByIdAsync(usuarioId);                
 
-            return CreatedAtAction(nameof(GetUsuarios), new { id = usuarioId });
+                return CreatedAtAction(nameof(GetUsuarios), new { id = usuarioId }, usuario);
+            }
+            catch (BadRequestException exception) {
+                return BadRequest(exception.Message);
+            }
+            catch (System.Exception exception)
+            {
+                _logger.LogError(exception, "Ocorreu um erro ao processar a requisição.");
+                return StatusCode(500, "Internal Server Error");
+            }
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> PutUsuario(int id, UpdateUsuarioCommand command)
         {
-            if (id != command.Id)
+            try
             {
-                return BadRequest();
+                if (id != command.Id)
+                {
+                    return BadRequest();
+                }
+
+                await _usuarioCommandHandler.Handle(command);
+                return NoContent();
             }
-
-            await _usuarioCommandHandler.Handle(command);
-
-            return NoContent();
+            catch (BadRequestException exception) 
+            {
+                return BadRequest(exception.Message);
+            }
+            catch (System.Exception exception)
+            {
+                _logger.LogError(exception, "Ocorreu um erro ao processar a requisição.");
+                return StatusCode(500, "Internal Server Error");
+            }
         }
 
         [HttpDelete("{id}")]

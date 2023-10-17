@@ -1,13 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
 namespace UserManagementAPI.Application.Domain.Exceptions
 {
-    public class RequiredFieldException : Exception
+    public class RequiredFieldException : BadRequestException
     {
-        public string FieldName { get; }
-        public RequiredFieldException(string message, string fieldName) : base(message) { FieldName = fieldName; }
+        public RequiredFieldException(string fieldName) : base($"O campo {fieldName} é obrigatório") { }
     }
 }

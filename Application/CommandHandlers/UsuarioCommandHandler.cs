@@ -55,7 +55,7 @@ namespace UserManagementAPI.Application.CommandHandlers
         {
             if (descricao.IsNullOrEmpty()) 
             {
-                throw new RequiredFieldException(fieldName: "Escolaridadw", message: "Informe a Escolaridade");
+                throw new RequiredFieldException("Escolaridade");
             }
 
             var escolaridade = await _escolaridadeRepository.GetEscolaridadeByDescricaoAsync(descricao!);
