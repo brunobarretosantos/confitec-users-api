@@ -8,7 +8,7 @@ namespace UserManagementAPI.Application.Commands
         public required string Sobrenome { get; set; }
         public required string Email { get; set; }
         public DateTime DataNascimento { get; set; }
-        public int EscolaridadeId { get; set; }
+        public string? Escolaridade { get; set; }
         public int HistoricoEscolarId { get; set; }
 
         public Usuario ToModel()
@@ -19,7 +19,6 @@ namespace UserManagementAPI.Application.Commands
                 Sobrenome = this.Sobrenome,
                 Email = this.Email,
                 DataNascimento = this.DataNascimento,
-                EscolaridadeId = this.EscolaridadeId,
                 HistoricoEscolarId = this.HistoricoEscolarId            
             };
         }
