@@ -29,15 +29,26 @@ namespace UserManagementAPI.Controllers
             return Ok(usuarios);
         }
 
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Usuario>> GetUsuarioById(int id)
+        {
+            var usuario = await _usuarioRepository.GetUsuarioByIdAsync(id);
+
+            if (usuario == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(usuario);
+        }
+
         [HttpPost]
         public async Task<ActionResult<Usuario>> PostUsuario(AddUsuarioCommand command)
         {      
             try
             {
-                var usuarioId = await _usuarioCommandHandler.Handle(command);
-                var usuario = await _usuarioRepository.GetUsuarioByIdAsync(usuarioId);                
-
-                return CreatedAtAction(nameof(GetUsuarios), new { id = usuarioId }, usuario);
+                var usuario = await _usuarioCommandHandler.Handle(command);
+                return CreatedAtAction(nameof(GetUsuarioById), new { id = usuario.Id }, usuario);
             }
             catch (BadRequestException exception) {
                 return BadRequest(exception.Message);

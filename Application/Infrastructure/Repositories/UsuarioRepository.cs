@@ -20,13 +20,15 @@ namespace UserManagementAPI.Application.Infrastructure.Repositories
 
         public async Task<Usuario?> GetUsuarioByIdAsync(int id)
         {
-            return await _context.Usuarios.FirstOrDefaultAsync(u => u.Id == id);
+            return await _context.Usuarios.FindAsync(id);
         }
 
-        public async Task<int> AddUsuarioAsync(Usuario usuario)
+        public async Task<Usuario> AddUsuarioAsync(Usuario usuario)
         {
             _context.Usuarios.Add(usuario);
-            return await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
+
+            return usuario;
         }
 
         public async Task UpdateUsuarioAsync(Usuario usuario)

@@ -19,7 +19,7 @@ namespace UserManagementAPI.Application.CommandHandlers
             _escolaridadeRepository = escolaridadeRepository;
         }
 
-        public async Task<int> Handle(AddUsuarioCommand command)
+        public async Task<Usuario> Handle(AddUsuarioCommand command)
         {
             ValidarAtributos(command);
 
@@ -29,8 +29,8 @@ namespace UserManagementAPI.Application.CommandHandlers
             usuario.Escolaridade = escolaridade;
             usuario.EscolaridadeId = escolaridade.Id;
 
-            int usuarioId = await _usuarioRepository.AddUsuarioAsync(usuario);
-            return usuarioId;
+            var usuarioAdded = await _usuarioRepository.AddUsuarioAsync(usuario);
+            return usuarioAdded;
         }
 
         public async Task Handle(UpdateUsuarioCommand command)
@@ -73,7 +73,17 @@ namespace UserManagementAPI.Application.CommandHandlers
             return escolaridade;
         }
 
-        private void ValidarAtributos(IUsuarioCommand usuarioCommand) {
+        private void ValidarAtributos(IUsuarioCommand usuarioCommand) 
+        {
+            if (usuarioCommand.Nome.Trim().IsNullOrEmpty())
+            {
+                throw new RequiredFieldException("Nome");
+            }
+
+            if (usuarioCommand.Sobrenome.Trim().IsNullOrEmpty())
+            {
+                throw new RequiredFieldException("Sobrenome");
+            }
             
             if (!EmailValidator.IsValid(usuarioCommand.Email)){
                 throw new InvalidFieldException("E-Mail");
