@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using UserManagementAPI.Data;
+using UserManagementAPI.Application.CommandHandlers;
+using UserManagementAPI.Application.Infrastructure.Repositories;
+using UserManagementAPI.Infrastructure.DbContext;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,6 +9,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer("name=ConnectionStrings:DefaultConnection"));
+builder.Services.AddScoped<UsuarioRepository>();
+builder.Services.AddScoped<UsuarioCommandHandler>();
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

@@ -5,14 +5,14 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using UserManagementAPI.Data;
+using UserManagementAPI.Infrastructure.DbContext;
 
 #nullable disable
 
 namespace UserManagementAPI.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20231017151333_InitialCreate")]
+    [Migration("20231017171850_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -25,7 +25,7 @@ namespace UserManagementAPI.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("UserManagementAPI.Models.Escolaridade", b =>
+            modelBuilder.Entity("UserManagementAPI.Domain.Models.Escolaridade", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -42,7 +42,7 @@ namespace UserManagementAPI.Migrations
                     b.ToTable("Escolaridades");
                 });
 
-            modelBuilder.Entity("UserManagementAPI.Models.HistoricoEscolar", b =>
+            modelBuilder.Entity("UserManagementAPI.Domain.Models.HistoricoEscolar", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -63,7 +63,7 @@ namespace UserManagementAPI.Migrations
                     b.ToTable("HistoricosEscolares");
                 });
 
-            modelBuilder.Entity("UserManagementAPI.Models.Usuario", b =>
+            modelBuilder.Entity("UserManagementAPI.Domain.Models.Usuario", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()

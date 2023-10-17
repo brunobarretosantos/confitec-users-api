@@ -1,0 +1,57 @@
+# Arquivos de compilação
+bin/
+obj/
+
+# Arquivos de dependências (ex.: pacotes NuGet)
+*.dll
+*.exe
+*.pdb
+*.dll.config
+*.json
+*.csproj.user
+*.jfm
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Pasta de publicação
+wwwroot/
+
+# Arquivos de configuração
+appsettings.json
+appsettings.Development.json
+launchSettings.json
+
+# Arquivos temporários
+*.swp
+
+# Pasta de logs
+*.log
+
+# Pasta de módulos do Node.js
+node_modules/
+
+# Cache do Visual Studio
+.vscode/
+.vs/
+
+# Pasta de pacotes do NuGet
+packages/
+
+# Pasta de logs do .NET Core
+logs/
+*.nupkg
+
+# Pasta de resultados de teste
+TestResults/
+[Tt]est[Rr]esult*/
+*.trx
+*.nupkg
+
+# Arquivos de perfil
+*.i
+
+# Arquivos de configuração do Rider
+.idea/
+*.sln.iml

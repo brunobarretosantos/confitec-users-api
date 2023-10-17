@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using UserManagementAPI.Data;
-using UserManagementAPI.Models;
+using UserManagementAPI.Domain.Models;
+using UserManagementAPI.Application.Commands;
+using UserManagementAPI.Application.CommandHandlers;
+using UserManagementAPI.Application.Infrastructure.Repositories;
 
 namespace UserManagementAPI.Controllers
 {
@@ -9,53 +11,39 @@ namespace UserManagementAPI.Controllers
     [ApiController]
     public class UsuariosController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly UsuarioCommandHandler _usuarioCommandHandler;
+        private readonly UsuarioRepository _usuarioRepository;
 
-        public UsuariosController(ApplicationDbContext context)
+        public UsuariosController(UsuarioCommandHandler usuarioCommandHandler, UsuarioRepository usuarioRepository)        
         {
-            _context = context;
+            _usuarioCommandHandler = usuarioCommandHandler;
+            _usuarioRepository = usuarioRepository;
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Usuario>>> GetUsuarios()
         {
-            return await _context.Usuarios.ToListAsync();
+            var usuarios = await _usuarioRepository.GetUsuariosAsync();
+            return Ok(usuarios);
         }
 
         [HttpPost]
-        public async Task<ActionResult<Usuario>> PostUsuario(Usuario usuario)
+        public async Task<ActionResult<Usuario>> PostUsuario(AddUsuarioCommand command)
         {
-            _context.Usuarios.Add(usuario);
-            await _context.SaveChangesAsync();
+            var usuarioId = await _usuarioCommandHandler.Handle(command);
 
-            return CreatedAtAction(nameof(GetUsuarios), new { id = usuario.Id }, usuario);
+            return CreatedAtAction(nameof(GetUsuarios), new { id = usuarioId });
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutUsuario(int id, Usuario usuario)
+        public async Task<IActionResult> PutUsuario(int id, UpdateUsuarioCommand command)
         {
-            if (id != usuario.Id)
+            if (id != command.Id)
             {
                 return BadRequest();
             }
 
-            _context.Entry(usuario).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!UsuarioExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            await _usuarioCommandHandler.Handle(command);
 
             return NoContent();
         }
@@ -63,21 +51,17 @@ namespace UserManagementAPI.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUsuario(int id)
         {
-            var usuario = await _context.Usuarios.FindAsync(id);
-            if (usuario == null)
+            try
             {
-                return NotFound();
+                var command = new DeleteUsuarioCommand { UsuarioId = id };
+                await _usuarioCommandHandler.Handle(command);
+                
+                return NoContent();
             }
-
-            _context.Usuarios.Remove(usuario);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool UsuarioExists(int id)
-        {
-            return _context.Usuarios.Any(e => e.Id == id);
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
     }
 }

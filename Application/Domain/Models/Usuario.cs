@@ -1,4 +1,4 @@
-namespace UserManagementAPI.Models
+namespace UserManagementAPI.Domain.Models
 {
     public class Usuario
     {
