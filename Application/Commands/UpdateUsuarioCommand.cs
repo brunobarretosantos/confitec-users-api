@@ -2,7 +2,7 @@ using UserManagementAPI.Domain.Models;
 
 namespace UserManagementAPI.Application.Commands
 {
-    public class UpdateUsuarioCommand
+    public class UpdateUsuarioCommand : IUsuarioCommand
     {
         public int Id { get; set; }
         public required string Nome { get; set; }

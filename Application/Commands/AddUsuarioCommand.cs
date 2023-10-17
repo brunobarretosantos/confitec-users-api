@@ -2,7 +2,7 @@ using UserManagementAPI.Domain.Models;
 
 namespace UserManagementAPI.Application.Commands
 {
-    public class AddUsuarioCommand
+    public class AddUsuarioCommand : IUsuarioCommand
     {
         public required string Nome { get; set; }
         public required string Sobrenome { get; set; }

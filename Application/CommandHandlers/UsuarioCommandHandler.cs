@@ -3,6 +3,7 @@ using Microsoft.IdentityModel.Tokens;
 using UserManagementAPI.Application.Commands;
 using UserManagementAPI.Application.Domain.Exceptions;
 using UserManagementAPI.Application.Infrastructure.Repositories;
+using UserManagementAPI.Application.Validators;
 using UserManagementAPI.Domain.Models;
 
 namespace UserManagementAPI.Application.CommandHandlers
@@ -20,7 +21,9 @@ namespace UserManagementAPI.Application.CommandHandlers
 
         public async Task<int> Handle(AddUsuarioCommand command)
         {
-            var escolaridade = await ObterEscolaridade(command.Escolaridade);            
+            ValidarAtributos(command);
+
+            var escolaridade = await ObterEscolaridade(command.Escolaridade);
 
             var usuario = command.ToModel();
             usuario.Escolaridade = escolaridade;
@@ -32,6 +35,8 @@ namespace UserManagementAPI.Application.CommandHandlers
 
         public async Task Handle(UpdateUsuarioCommand command)
         {
+            ValidarAtributos(command);
+            
             var escolaridade = await ObterEscolaridade(command.Escolaridade);
 
             var usuario = command.ToModel();
@@ -66,6 +71,17 @@ namespace UserManagementAPI.Application.CommandHandlers
             }
 
             return escolaridade;
+        }
+
+        private void ValidarAtributos(IUsuarioCommand usuarioCommand) {
+            
+            if (!EmailValidator.IsValid(usuarioCommand.Email)){
+                throw new InvalidFieldException("E-Mail");
+            }
+
+            if (!DataNascimentoValidator.IsValid(usuarioCommand.DataNascimento)) {
+                throw new InvalidFieldException("Data de Nascimento");
+            }
         }
     }
 }
