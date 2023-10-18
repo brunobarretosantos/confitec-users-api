@@ -16,12 +16,19 @@ namespace UserManagementAPI.Application.Infrastructure.Repositories
 
         public async Task<IEnumerable<Usuario>> GetUsuariosAsync()
         {
-            return await _context.Usuarios.Include(u => u.Escolaridade).ToListAsync();
+            return await _context.Usuarios
+                .Include(u => u.Escolaridade)
+                .Include(u => u.HistoricoEscolar)
+                .ToListAsync();
         }
 
         public async Task<Usuario?> GetUsuarioByIdAsync(int id)
         {
-            return await _context.Usuarios.Include(u => u.Escolaridade).Where(u => u.Id == id).FirstOrDefaultAsync();
+            return await _context.Usuarios
+                .Include(u => u.Escolaridade)
+                .Include(u => u.HistoricoEscolar)
+                .Where(u => u.Id == id)
+                .FirstOrDefaultAsync();
         }
 
         public async Task<Usuario> AddUsuarioAsync(Usuario usuario)
@@ -45,6 +52,21 @@ namespace UserManagementAPI.Application.Infrastructure.Repositories
             usuarioToUpdate.DataNascimento = usuario.DataNascimento;
             usuarioToUpdate.Email = usuario.Email;
             usuarioToUpdate.Escolaridade = usuario.Escolaridade;
+
+            _context.Attach(usuarioToUpdate);
+            _context.Entry(usuarioToUpdate).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task UpdateUsuarioHistoricoEscolarAsync(Usuario usuario, HistoricoEscolar historicoEscolar)
+        {
+            var usuarioToUpdate = await GetUsuarioByIdAsync(usuario.Id);
+
+            if (usuarioToUpdate == null) {
+                throw new UsuarioNaoExisteException();
+            }
+
+            usuarioToUpdate.HistoricoEscolar = historicoEscolar;
 
             _context.Attach(usuarioToUpdate);
             _context.Entry(usuarioToUpdate).State = EntityState.Modified;

@@ -12,11 +12,13 @@ namespace UserManagementAPI.Application.CommandHandlers
     {
         private readonly UsuarioRepository _usuarioRepository;
         private readonly EscolaridadeRepository _escolaridadeRepository;
+        private readonly HistoricoEscolarRepository _historicoEscolarRepository;
 
-        public UsuarioCommandHandler(UsuarioRepository usuarioRepository, EscolaridadeRepository escolaridadeRepository)
+        public UsuarioCommandHandler(UsuarioRepository usuarioRepository, EscolaridadeRepository escolaridadeRepository, HistoricoEscolarRepository historicoEscolarRepository)
         {
             _usuarioRepository = usuarioRepository;
             _escolaridadeRepository = escolaridadeRepository;
+            _historicoEscolarRepository = historicoEscolarRepository;
         }
 
         public async Task<Usuario> Handle(AddUsuarioCommand command)
@@ -51,6 +53,28 @@ namespace UserManagementAPI.Application.CommandHandlers
         public async Task Handle(DeleteUsuarioCommand command)
         {
             await _usuarioRepository.DeleteUsuarioAsync(command.UsuarioId);
+        }
+
+        public async Task Handle(AddHistoricoEscolarCommand command)
+        {
+            var usuario = await GetUsuarioById(command.UsuarioId);
+
+            if (usuario == null)
+            {
+                throw new UsuarioNaoExisteException();
+            }
+
+            var historicoEscolar = usuario.HistoricoEscolar ?? new HistoricoEscolar{ Nome = command.Nome, Formato = command.Formato, Id = 0 };
+
+            if (historicoEscolar.Id == 0)
+            {
+                var newHistoricoEscolar = await _historicoEscolarRepository.AddHistoricoEscolarAsync(historicoEscolar);
+                await _usuarioRepository.UpdateUsuarioHistoricoEscolarAsync(usuario, newHistoricoEscolar);
+            } else {
+                historicoEscolar.Nome = command.Nome;
+                historicoEscolar.Formato = command.Formato;
+                await _historicoEscolarRepository.UpdateHistoricoEscolarAsync(historicoEscolar);
+            }
         }
 
         public async Task<Usuario?> GetUsuarioById(int id)

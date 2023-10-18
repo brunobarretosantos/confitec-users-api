@@ -16,12 +16,18 @@ namespace UserManagementAPI.Controllers
         private readonly UsuarioCommandHandler _usuarioCommandHandler;
         private readonly UsuarioRepository _usuarioRepository;
         private readonly ILogger<UsuariosController> _logger;
+        private readonly IHttpClientFactory _httpClientFactory;
 
-        public UsuariosController(UsuarioCommandHandler usuarioCommandHandler, UsuarioRepository usuarioRepository, ILogger<UsuariosController> logger)        
+        public UsuariosController(
+            UsuarioCommandHandler usuarioCommandHandler,
+            UsuarioRepository usuarioRepository,
+            ILogger<UsuariosController> logger,
+            IHttpClientFactory httpClientFactory)
         {
             _usuarioCommandHandler = usuarioCommandHandler;
             _usuarioRepository = usuarioRepository;
             _logger = logger;
+            _httpClientFactory = httpClientFactory;
         }
 
         [HttpGet]
@@ -114,5 +120,54 @@ namespace UserManagementAPI.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+        [HttpPost("{id}/upload-historico-escolar")]
+        public async Task<IActionResult> UploadHistoricoEscolar(int id, [FromForm] IFormFile historicoEscolar)
+        {
+            try
+            {
+                if (historicoEscolar == null || historicoEscolar.Length == 0)
+                {
+                    return BadRequest(new { Message = "Nenhum arquivo enviado." });
+                }
+
+                var usuario = await _usuarioRepository.GetUsuarioByIdAsync(id);
+                if (usuario == null)
+                {
+                    return NotFound(new { Message = "Usuário não encontrado." });
+                }                
+
+                var allowedExtensions = new[] { ".pdf", ".doc", ".docx" };
+                var fileExtension = Path.GetExtension(historicoEscolar.FileName).ToLower();
+                if (!allowedExtensions.Contains(fileExtension))
+                {
+                    return BadRequest(new { Message = "Formato de arquivo inválido. Use PDF ou DOC." });
+                }
+
+                var fileName = Guid.NewGuid().ToString() + fileExtension;
+
+                var uploadDirectory = "/tmp/uploads";
+                var filePath = Path.Combine(uploadDirectory, fileName);
+
+                if (!Directory.Exists(uploadDirectory))
+                {
+                    Directory.CreateDirectory(uploadDirectory);
+                }
+
+                using var stream = new FileStream(filePath, FileMode.Create);
+                await historicoEscolar.CopyToAsync(stream);
+
+                var command = new AddHistoricoEscolarCommand { UsuarioId = id, Nome = filePath, Formato = fileExtension};
+                await _usuarioCommandHandler.Handle(command);
+
+                return Ok();
+            }
+            catch (Exception exception)
+            {
+                _logger.LogError(exception, "Ocorreu um erro ao processar a requisição.");
+                return StatusCode(500, new { Message = "Erro ao salvar o histórico escolar." });
+            }
+        }
+
     }
 }
