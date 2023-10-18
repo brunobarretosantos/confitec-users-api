@@ -95,6 +95,13 @@ namespace UserManagementAPI.Controllers
         {
             try
             {
+                var usuario = await _usuarioRepository.GetUsuarioByIdAsync(id);
+
+                if (usuario == null)
+                {
+                    return NotFound();
+                }
+
                 var command = new DeleteUsuarioCommand { UsuarioId = id };
                 await _usuarioCommandHandler.Handle(command);
                 
