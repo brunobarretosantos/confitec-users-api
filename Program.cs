@@ -9,6 +9,16 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddLogging(builder => { builder.AddConsole();});
 builder.Services.AddControllers();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAnyOrigin",
+        builder =>
+        {
+            builder.AllowAnyOrigin()
+                   .AllowAnyHeader()
+                   .AllowAnyMethod();
+        });
+});
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer("name=ConnectionStrings:DefaultConnection"));
 builder.Services.AddScoped<EscolaridadeRepository>();
 builder.Services.AddScoped<UsuarioRepository>();
@@ -32,5 +42,7 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.UseCors("AllowAnyOrigin");
 
 app.Run();

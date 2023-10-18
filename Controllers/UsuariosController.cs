@@ -4,11 +4,13 @@ using UserManagementAPI.Application.Commands;
 using UserManagementAPI.Application.CommandHandlers;
 using UserManagementAPI.Application.Infrastructure.Repositories;
 using UserManagementAPI.Application.Domain.Exceptions;
+using Microsoft.AspNetCore.Cors;
 
 namespace UserManagementAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [EnableCors("AllowAnyOrigin")]
     public class UsuariosController : ControllerBase
     {
         private readonly UsuarioCommandHandler _usuarioCommandHandler;
