@@ -22,6 +22,7 @@ namespace UserManagementAPI.Application.CommandHandlers
         public async Task<Usuario> Handle(AddUsuarioCommand command)
         {
             ValidarAtributos(command);
+            await ValidarUsuarioExistente(0, command);
 
             var escolaridade = await ObterEscolaridade(command.Escolaridade);
 
@@ -36,6 +37,7 @@ namespace UserManagementAPI.Application.CommandHandlers
         public async Task Handle(UpdateUsuarioCommand command)
         {
             ValidarAtributos(command);
+            await ValidarUsuarioExistente(command.Id, command);
             
             var escolaridade = await ObterEscolaridade(command.Escolaridade);
 
@@ -91,6 +93,19 @@ namespace UserManagementAPI.Application.CommandHandlers
 
             if (!DataNascimentoValidator.IsValid(usuarioCommand.DataNascimento)) {
                 throw new InvalidFieldException("Data de Nascimento");
+            }
+        }
+
+        private async Task ValidarUsuarioExistente(int id, IUsuarioCommand usuarioCommand)
+        {
+            if (await _usuarioRepository.IsEmailAlreadyExistsAsync(id, usuarioCommand.Email))
+            {
+                throw new UsuarioDuplicadoException("Já existe um usuário cadastrado com o mesmo e-mail");
+            }
+
+            if (await _usuarioRepository.IsUserAlreadyExistsAsync(id, usuarioCommand.Nome, usuarioCommand.Sobrenome, usuarioCommand.DataNascimento))
+            {
+                throw new UsuarioDuplicadoException("Já existe um usuário cadastrado com o mesmo nome, sobrenome e data de nascimento");
             }
         }
     }
