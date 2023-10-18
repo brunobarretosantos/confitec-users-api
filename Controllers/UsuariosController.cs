@@ -169,5 +169,47 @@ namespace UserManagementAPI.Controllers
             }
         }
 
+        [HttpGet("{id}/download-historico-escolar")]
+        public async Task<IActionResult> DownloadHistoricoEscolar(int id)
+        {
+            try
+            {
+                var usuario = await _usuarioRepository.GetUsuarioByIdAsync(id);
+
+                if (usuario == null || usuario.HistoricoEscolar == null)
+                {
+                    return NotFound(new { Message = "Usuário ou histórico escolar não encontrado." });
+                }
+
+                var historicoEscolar = usuario.HistoricoEscolar;
+
+                var memory = new MemoryStream();
+                using (var stream = new FileStream(historicoEscolar.Nome, FileMode.Open))
+                {
+                    await stream.CopyToAsync(memory);
+                }
+                memory.Position = 0;
+
+                return File(memory, GetContentType(historicoEscolar.Formato), $"Histórico Escolar de {usuario.Nome}{historicoEscolar.Formato}");
+            }
+            catch (Exception exception)
+            {
+                _logger.LogError(exception, "Ocorreu um erro ao processar a requisição.");
+                return StatusCode(500, new { Message = "Erro ao realizar o download do histórico escolar." });
+            }
+        }
+
+        private static string GetContentType(string path)
+        {
+            var types = new Dictionary<string, string>
+            {
+                { ".pdf", "application/pdf" },
+                { ".doc", "application/msword" },
+                { ".docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document" },
+            };
+
+            var ext = Path.GetExtension(path).ToLowerInvariant();
+            return types.ContainsKey(ext) ? types[ext] : "application/octet-stream";
+        }
     }
 }
