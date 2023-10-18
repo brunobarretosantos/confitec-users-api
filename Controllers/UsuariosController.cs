@@ -25,7 +25,8 @@ namespace UserManagementAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Usuario>>> GetUsuarios()
         {
-            var usuarios = await _usuarioRepository.GetUsuariosAsync();
+            var usuarios = await _usuarioRepository.GetUsuariosAsync();            
+            
             return Ok(usuarios);
         }
 
@@ -68,6 +69,11 @@ namespace UserManagementAPI.Controllers
                 if (id != command.Id)
                 {
                     return BadRequest();
+                }
+
+                var usuario = await _usuarioRepository.GetUsuarioByIdAsync(id);
+                if (usuario == null){
+                    return NotFound();
                 }
 
                 await _usuarioCommandHandler.Handle(command);

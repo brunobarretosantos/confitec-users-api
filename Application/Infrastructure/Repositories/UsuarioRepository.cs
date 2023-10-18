@@ -15,12 +15,12 @@ namespace UserManagementAPI.Application.Infrastructure.Repositories
 
         public async Task<IEnumerable<Usuario>> GetUsuariosAsync()
         {
-            return await _context.Usuarios.ToListAsync();
+            return await _context.Usuarios.Include(u => u.Escolaridade).ToListAsync();
         }
 
         public async Task<Usuario?> GetUsuarioByIdAsync(int id)
         {
-            return await _context.Usuarios.FindAsync(id);
+            return await _context.Usuarios.Include(u => u.Escolaridade).Where(u => u.Id == id).FirstOrDefaultAsync();
         }
 
         public async Task<Usuario> AddUsuarioAsync(Usuario usuario)
